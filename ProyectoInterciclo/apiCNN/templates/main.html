@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Deteccion de Tumores</title>
+</head>
+
+<body>
+
+    <style>
+        body {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            /*Se queda en el centro no se mueve*/
+            background-image: url(https://images4.alphacoders.com/104/thumb-1920-1044373.jpg);
+        }
+        
+        .container-fluid {
+            margin-left: 40%;
+        }
+    </style>
+
+    <script>
+        function volverClasific() {
+
+            document.getElementById('formulario').style.visibility = 'visible';
+            document.getElementById('div_prediccion').style.visibility = 'visible';
+            document.getElementById('tabla').style.visibility = 'hidden';
+
+            document.getElementById('liop1').setAttribute("class", "active");
+            document.getElementById('liop2').setAttribute("class", "inactive");
+
+        }
+
+
+        function previewImageInput() {
+            let preview = document.getElementById('img_tag')
+            let file = document.querySelector('input[type=file]').files[0];
+            let reader = new FileReader();
+
+            reader.addEventListener('load', function() {
+                preview.src = reader.result;
+            }, false);
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function getBase64(file) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = function() {
+                sendData(reader.result);
+            }
+        }
+
+        function sendData(data) {
+            var token = document.getElementsByName('csrfmiddlewaretoken');
+            let form = $('form')[0];
+            $.ajax({
+                type: 'POST',
+                url: '/apiCNN/predecir/',
+                data: {
+                    'mydata': data,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data, textStatus) {
+                    json = JSON.stringify(data);
+                    json = JSON.parse(json);
+                    document.getElementById('clase').innerHTML = "<strong>Clase Predicha: </strong>" + json.clase
+                    document.getElementById('probabilidad').innerHTML = "<strong>Probabilidad: </strong>" + json.probabilidad + '%'
+                    document.getElementById('div_prediccion').style.display = 'block'
+                    document.getElementById("div_prediccion").scrollIntoView();
+                },
+                error: function(xhr, status, e) {
+                    alert(status, e);
+                }
+            });
+        }
+
+        function listarRegistros() {
+
+            document.getElementById('formulario').style.visibility = 'hidden';
+            document.getElementById('div_prediccion').style.visibility = 'hidden';
+
+            document.getElementById('liop1').setAttribute("class", "inactive");
+            document.getElementById('liop2').setAttribute("class", "active");
+
+
+            $.ajax({
+                type: 'POST',
+                url: '/apiCNN/listar/',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    json = JSON.parse(data);
+                    let tag_str = "";
+                    document.getElementById('tabla').style.visibility = 'visible';
+                    for (let i = 0; i < json.length; i++) {
+                        let obj = json[i];
+                        if (obj.fields.porcentage !== undefined) {
+                            tag_str += "<tr>" +
+                                "<td>" + obj.fields.nombre + "</td>" +
+                                "<td>" + obj.fields.prediccion + "</td>" +
+                                "<td>" + obj.fields.porcentage + "%</td>" +
+                                "</tr>";
+                        }
+                    }
+                    document.getElementById('table_content').innerHTML = tag_str;
+
+                }
+            });
+
+        }
+
+        async function enviar() {
+            let file = document.getElementById('elm_img').files[0];
+            if (!requeried(document.getElementById('elm_img'))) {
+                getBase64(file);
+            } else {
+
+            }
+
+        }
+
+
+
+
+        function requeried(inputtx) {
+            return inputtx.value.length === 0;
+        }
+    </script>
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li id="liop1" class="active"><a onclick="volverClasific()">Clasificar con Foto</a></li>
+                <li id="liop2" class="inactive"><a onclick="listarRegistros()">Listar Fotos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+
+    <div>
+
+        <form id="formulario" action="/apiCNN/predecir/" enctype="multipart/form-data" method="POST" style="margin-left: auto; margin-right: auto; width: 80%; visibility: visible">
+
+            <div class="banner" style="background-color: black">
+                <h1 style="font-size: 3vw">Clasificador de tumores Cerebrales</h1>
+            </div>
+
+
+
+            <div class="item" style="float: left;padding-left: 24%; margin-bottom: 3%;">
+                <h3 style="color: black ">Subir una Imagen</h3>
+                <input style="color: black " id="elm_img" name="elm_img" type="file" accept="image/x-png, image/jpeg" onchange="previewImageInput()" />
+            </div>
+
+            <div class="item" style="float: left;">
+                <br> <br>
+                <input type="button" onclick="enviar()" value="PREDECIR IMAGEN" />
+            </div>
+
+            <div class="item" style="clear: both; margin-left: 29%;">
+                <img id="img_tag" src="https://i.pinimg.com/236x/4b/8d/aa/4b8daab5ab378f896e6bb7e0da4c2eaa--creepy-things-creepy-stuff.jpg" style="width: 50%; height: 50%; 
+                                                margin-left: auto;
+                                                margin-right: auto;" name="img_tag" alt="" /><br>
+            </div>
+
+        </form>
+
+
+    </div>
+
+    <div id="div_prediccion" class="container" style="margin-top: 4%;
+        margin-bottom: 4%;
+        border-top: solid 2px;
+        border-bottom: solid 2px;
+        display: none;
+        visibility: visible;
+        color: white;
+        background-color: black;">
+
+        <h2 style="font-size: 2.5vw;" id="clase"><strong>Clase Predicha: </strong></h2>
+        <h2 style="border-top: solid 1px; border-bottom: 2px solid"></h2>
+        <h2 style="font-size: 2.5vw;" id="probabilidad"><strong>Probabilidad: </strong></h2>
+    </div>
+
+
+
+    <table id='tabla' class="table" style="width: 70%; margin-left: auto; margin-right: auto; max-height:500px; overflow-y:scroll; display:block; visibility: hidden;  color: white; position: absolute; left: 19%;
+    top: 20%">
+        <thead style="position: sticky; top: 0; background-color: black; color: white">
+            <tr>
+                <th scope="col" style="width: 50%">NombreImagen</th>
+                <th scope="col" style="width: 50%">Cancer Predecido</th>
+                <th scope="col" style="width: 60%; margin-left: 250px">Certeza</th>
+            </tr>
+        </thead>
+        <tbody id="table_content" style="width: 100%">
+        </tbody>
+    </table>
+
+
+
+
+
+
+    <footer style="background-color: black; color: white; height: auto; padding-left: 70%; clear: both; float: left;">
+        <div id="info" style="float: left; margin-left: -200%;">
+            <h2 style="font-size: 2em">Informacion del trabajo:</h2>
+            <p style="font-size: 1.5em">Realizado por: Carlos Peña y Florencio Peralta </p><br>
+        </div>
+        <img style="width: 30%; height: 30%; float: right; margin-right: 20%; margin-top: 1.5%;" src="https://static.wikia.nocookie.net/kirby/images/c/cf/Doctor_%28KPR%29.png/revision/latest?cb=20200830215252" alt="Kirby">
+    </footer>
+
+</body>
+
+</html>
