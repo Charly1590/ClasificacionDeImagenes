@@ -116,4 +116,4 @@ wincertstore==0.2
 wrapt==1.12.1
 zipp==2.2.0
 python-decouple
-decouple
+decouple==0.0.7
