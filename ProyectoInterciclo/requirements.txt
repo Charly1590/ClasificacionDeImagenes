@@ -81,7 +81,7 @@ pyparsing==2.4.7
 Pyrebase4==4.4.1
 pyrsistent==0.15.7
 python-dateutil==2.8.1
-python-decouple==3.3
+python-decouple
 python-jwt==2.0.1
 pytz==2020.4
 pywinpty==0.5.7
@@ -115,4 +115,4 @@ whitenoise==5.2.0
 wincertstore==0.2
 wrapt==1.12.1
 zipp==2.2.0
-decouple
+
