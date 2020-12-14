@@ -61,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'witenoise.middleware.WiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'ProyectoML.urls'
@@ -129,13 +128,3 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = os.path.join(BASE_DIR, '/media/')
-
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'), 
-)
-
-STATICFILES_STORAGE = 'witenoise.storage.CompressedMainfestStaticFilesStorage'
-
