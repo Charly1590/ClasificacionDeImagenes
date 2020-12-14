@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'witenoise.middleware.WiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'ProyectoInterciclo.urls'
@@ -137,5 +137,5 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'), 
 )
 
-STATICFILES_STORAGE = 'witenoise.storage.CompressedMainfestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedMainfestStaticFilesStorage'
 
